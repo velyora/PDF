@@ -2,6 +2,7 @@ import ccxt
 import pandas as pd
 import time
 import json
+import asyncio
 from telegram import Bot
 
 # Binance API Settings
@@ -77,12 +78,12 @@ def analyze_data(df):
     df['entry'] = (df['macd'] > df['signal']) & (df['macd'].shift(1) <= df['signal'].shift(1))
     return df
 
-# Function to send signal to Telegram
-def send_signal(message):
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+# Function to send signal to Telegram (asynchronous)
+async def send_signal(message):
+    await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 # Main Function
-def main():
+async def main():
     # Load active trades from file
     active_trades = load_trades()
 
@@ -123,7 +124,7 @@ def main():
 ━━━━━━━━━━━━━━━━
 💭 Smart trading Bot 💭
 """
-                        send_signal(message)
+                        await send_signal(message)
                         save_trades(active_trades)
 
             if symbol in active_trades:
@@ -139,7 +140,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 if not trade["hit_target"] and current_price >= trade["tp2"]:
@@ -151,7 +152,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 elif not trade["hit_stop"] and current_price <= trade["sl"]:
@@ -163,7 +164,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 if trade["hit_target"] or trade["hit_stop"]:
@@ -171,7 +172,7 @@ def main():
                     save_trades(active_trades)
 
         print("Waiting 15 minutes before analyzing new signals...")
-        time.sleep(900)
+        await asyncio.sleep(900)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
