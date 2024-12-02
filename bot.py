@@ -80,7 +80,10 @@ def analyze_data(df):
 
 # Function to send signal to Telegram (asynchronous)
 async def send_signal(message):
-    await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+    try:
+        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+    except Exception as e:
+        print(f"Error sending message: {e}")
 
 # Main Function
 async def main():
