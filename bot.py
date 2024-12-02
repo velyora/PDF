@@ -39,6 +39,7 @@ SL_PERCENT = 0.01    # Stop Loss (-1%)
 
 # File to store active trades
 TRADES_FILE = "active_trades.json"
+LOG_FILE = "signal_log.txt"
 
 # Telegram Bot Setup
 bot = Bot(token=TELEGRAM_TOKEN)
@@ -78,15 +79,20 @@ def analyze_data(df):
     df['entry'] = (df['macd'] > df['signal']) & (df['macd'].shift(1) <= df['signal'].shift(1))
     return df
 
-# Function to send signal to Telegram (synchronous)
-def send_signal_sync(message):
+# Function to send signal to Telegram and log it to a file
+async def send_signal(message):
     try:
-        bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+        # Send the message to Telegram
+        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+        
+        # Log the message in a local file
+        with open(LOG_FILE, "a") as log_file:
+            log_file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
     except Exception as e:
         print(f"Error sending message: {e}")
 
 # Main Function
-def main():
+async def main():
     # Load active trades from file
     active_trades = load_trades()
 
@@ -127,7 +133,7 @@ def main():
 ━━━━━━━━━━━━━━━━
 💭 Smart trading Bot 💭
 """
-                        send_signal_sync(message)
+                        await send_signal(message)
                         save_trades(active_trades)
 
             if symbol in active_trades:
@@ -143,7 +149,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal_sync(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 if not trade["hit_target"] and current_price >= trade["tp2"]:
@@ -155,7 +161,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal_sync(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 elif not trade["hit_stop"] and current_price <= trade["sl"]:
@@ -167,7 +173,7 @@ def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    send_signal_sync(message)
+                    await send_signal(message)
                     save_trades(active_trades)
 
                 if trade["hit_target"] or trade["hit_stop"]:
@@ -175,7 +181,7 @@ def main():
                     save_trades(active_trades)
 
         print("Waiting 15 minutes before analyzing new signals...")
-        time.sleep(900)
+        await asyncio.sleep(900)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
