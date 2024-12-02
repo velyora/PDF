@@ -78,15 +78,15 @@ def analyze_data(df):
     df['entry'] = (df['macd'] > df['signal']) & (df['macd'].shift(1) <= df['signal'].shift(1))
     return df
 
-# Function to send signal to Telegram (asynchronous)
-async def send_signal(message):
+# Function to send signal to Telegram (synchronous)
+def send_signal_sync(message):
     try:
-        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+        bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except Exception as e:
         print(f"Error sending message: {e}")
 
 # Main Function
-async def main():
+def main():
     # Load active trades from file
     active_trades = load_trades()
 
@@ -127,7 +127,7 @@ async def main():
 ━━━━━━━━━━━━━━━━
 💭 Smart trading Bot 💭
 """
-                        await send_signal(message)
+                        send_signal_sync(message)
                         save_trades(active_trades)
 
             if symbol in active_trades:
@@ -143,7 +143,7 @@ async def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    await send_signal(message)
+                    send_signal_sync(message)
                     save_trades(active_trades)
 
                 if not trade["hit_target"] and current_price >= trade["tp2"]:
@@ -155,7 +155,7 @@ async def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    await send_signal(message)
+                    send_signal_sync(message)
                     save_trades(active_trades)
 
                 elif not trade["hit_stop"] and current_price <= trade["sl"]:
@@ -167,7 +167,7 @@ async def main():
 🔹 Price: {current_price:.4f}
 🔹 Time: {pd.Timestamp.now()}
 """
-                    await send_signal(message)
+                    send_signal_sync(message)
                     save_trades(active_trades)
 
                 if trade["hit_target"] or trade["hit_stop"]:
@@ -175,7 +175,7 @@ async def main():
                     save_trades(active_trades)
 
         print("Waiting 15 minutes before analyzing new signals...")
-        await asyncio.sleep(900)
+        time.sleep(900)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
