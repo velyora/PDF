@@ -1,3 +1,6 @@
 ccxt
 python-telegram-bot
 pandas
+pandas_ta
+numpy
+requests
