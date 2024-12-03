@@ -1,187 +1,144 @@
 import ccxt
 import pandas as pd
+import pandas_ta as ta
 import time
+import requests
+import os
 import json
-import asyncio
-from telegram import Bot
+from datetime import datetime
 
-# Binance API Settings
-BINANCE_API_KEY = "Ofcy6zfehw2ek3EaQRZlIykTjoB8PPC1WXUBPT2dE4moKhnwpZZz1iy02RLdI1VK"
-BINANCE_SECRET_KEY = "6VPKApBMS1HIUUE9Rq7kxiHwZZ9xeQvzRJEcTIyoLhqMalGExYnnxn3VgzsXmOz0"
+# إعداد التيلجرام
+TELEGRAM_BOT_TOKEN = '7569416193:AAF8Nr7RWGGuhjhUkWrR-oFlDWaiYEVQBm'  # توكن البوت الخاص بك
+TELEGRAM_CHAT_ID = '-1001664466794'  # رقم المحادثة الخاص بك
 
-# Telegram Bot Settings
-TELEGRAM_TOKEN = "7569416193:AAF8Nr7RWGGuhjhUkWrR-oFlDWaiYEVQBmM"
-TELEGRAM_CHAT_ID = "-1001664466794"
+# إعداد باينانس
+BINANCE_API_KEY = 'Ofcy6zfehw2ek3EaQRZlIykTjoB8PPC1WXUBPT2dE4moKhnwpZZz1iy02RLdI1VK'  # مفتاح باينانس
+BINANCE_API_SECRET = '6VPKApBMS1HIUUE9Rq7kxiHwZZ9xeQvzRJEcTIyoLhqMalGExYnnxn3VgzsXmOz0'  # سر باينانس
 
-# Binance Exchange Setup
-exchange = ccxt.binance({
-    'apiKey': BINANCE_API_KEY,
-    'secret': BINANCE_SECRET_KEY,
-    'enableRateLimit': True
-})
+# تحديد مكان حفظ الإشارات المرسلة
+SIGNALS_FILE = 'sent_signals.json'
 
-# List of Symbols
-SYMBOLS = [
-    'BTC/USDT', 'ETH/USDT', 'XRP/USDT', 'ADA/USDT', 'SOL/USDT', 'DOT/USDT', 'LTC/USDT', 'DOGE/USDT',
-    'BCH/USDT', 'MATIC/USDT', 'LINK/USDT', 'AVAX/USDT', 'ATOM/USDT', 'NEAR/USDT', 'TRX/USDT', 
-    'ETC/USDT', 'XLM/USDT', 'ALGO/USDT', 'VET/USDT', 'ICP/USDT', 'SAND/USDT', 'AXS/USDT',  
-    'DASH/USDT', 'IOTA/USDT', 'CHZ/USDT', 'CRV/USDT', 'SNX/USDT', 'FIL/USDT', 
-    'MKR/USDT', 'LRC/USDT', 'TRB/USDT'
-]
-
-# Timeframe
-TIMEFRAME = "15m"
-
-# Percentages for Take Profit and Stop Loss
-TP1_PERCENT = 0.007  # Target 1 (+0.7%)
-TP2_PERCENT = 0.015  # Target 2 (+1.5%)
-SL_PERCENT = 0.01    # Stop Loss (-1%)
-
-# File to store active trades
-TRADES_FILE = "active_trades.json"
-LOG_FILE = "signal_log.txt"
-
-# Telegram Bot Setup
-bot = Bot(token=TELEGRAM_TOKEN)
-
-# Function to save active trades to file
-def save_trades(active_trades):
-    with open(TRADES_FILE, "w") as file:
-        json.dump(active_trades, file)
-
-# Function to load active trades from file
-def load_trades():
+# إرسال الرسائل إلى التيلجرام
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
     try:
-        with open(TRADES_FILE, "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
+        requests.post(url, data=payload)
+        print(f"Sent message to Telegram: {message}")
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
 
-# Function to fetch data
-def fetch_data(symbol):
+# جلب بيانات الشموع
+def fetch_candles(exchange, symbol, timeframe="30m", limit=100):
     try:
-        ohlcv = exchange.fetch_ohlcv(symbol, timeframe=TIMEFRAME, limit=100)
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         return df
     except Exception as e:
-        print(f"Error fetching data for {symbol}: {e}")
-        return None
+        print(f"Error fetching candles for {symbol}: {e}")
+        return pd.DataFrame()
 
-# Function to analyze data using MACD
-def analyze_data(df):
-    if df is None:
-        return None
-    df['ema12'] = df['close'].ewm(span=12).mean()
-    df['ema26'] = df['close'].ewm(span=26).mean()
-    df['macd'] = df['ema12'] - df['ema26']
-    df['signal'] = df['macd'].ewm(span=9).mean()
-    df['entry'] = (df['macd'] > df['signal']) & (df['macd'].shift(1) <= df['signal'].shift(1))
-    return df
+# حساب الكسر
+def detect_downtrend_breakout(df):
+    if len(df) < 3:
+        return False
 
-# Function to send signal to Telegram and log it to a file
-async def send_signal(message):
-    try:
-        # Send the message to Telegram
-        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-        
-        # Log the message in a local file
-        with open(LOG_FILE, "a") as log_file:
-            log_file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
-    except Exception as e:
-        print(f"Error sending message: {e}")
+    # التحقق من الكسر الهابط
+    last_close = df['close'].iloc[-1]
+    prev_high = df['high'].iloc[-2]
+    trend_line_high = max(df['high'].iloc[-3], prev_high)
+    return last_close > trend_line_high
 
-# Main Function
-async def main():
-    # Load active trades from file
-    active_trades = load_trades()
+# إعداد الإشارات
+def prepare_signal(symbol, timeframe, entry_price):
+    if timeframe == "30m":
+        targets = [entry_price * 1.007, entry_price * 1.015, entry_price * 1.02]
+    elif timeframe == "15m":
+        targets = [entry_price * 1.005, entry_price * 1.01, entry_price * 1.015]
+    stop_loss = entry_price * 0.95
+
+    return {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "entry_price": entry_price,
+        "targets": [round(target, 6) for target in targets],
+        "stop_loss": round(stop_loss, 6)
+    }
+
+# إرسال الإشارة
+def send_trade_signal(signal):
+    message = f"""📊 إشارة تداول جديدة:
+🔹 العملة: {signal['symbol']}
+🔹 الإطار الزمني: {signal['timeframe']}
+🔹 الشراء: {signal['entry_price']}
+🎯 الأهداف:
+  - الهدف الأول: {signal['targets'][0]}
+  - الهدف الثاني: {signal['targets'][1]}
+  - الهدف الثالث: {signal['targets'][2]}
+🔻 وقف الخسارة: {signal['stop_loss']}
+"""
+    send_telegram_message(message)
+
+# متابعة الأهداف
+def monitor_targets(symbol, entry_price, targets, stop_loss, timeframe, exchange):
+    while True:
+        try:
+            ticker = exchange.fetch_ticker(symbol)
+            last_price = ticker['last']
+            
+            # تحقق من تحقيق الأهداف
+            for i, target in enumerate(targets):
+                if last_price >= target:
+                    send_telegram_message(f"🎯 تم تحقيق الهدف {i+1} للرمز {symbol}: {target}")
+                    targets[i] = float('inf')  # تعطيل الهدف الذي تم تحقيقه
+
+            # تحقق من وقف الخسارة
+            if last_price <= stop_loss:
+                send_telegram_message(f"❌ تم ضرب وقف الخسارة للرمز {symbol}: {stop_loss}")
+                break
+
+            # إنهاء المتابعة إذا تم تحقيق جميع الأهداف
+            if all(target == float('inf') for target in targets):
+                break
+
+            time.sleep(10)
+        except Exception as e:
+            print(f"Error monitoring targets for {symbol}: {e}")
+            break
+
+# الوظيفة الرئيسية
+def main():
+    binance = ccxt.binance({
+        'apiKey': BINANCE_API_KEY,
+        'secret': BINANCE_API_SECRET,
+    })
+
+    symbols = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'XRP/USDT', 'ADA/USDT']  # العملات
+    timeframes = ['15m', '30m']
 
     while True:
-        for symbol in SYMBOLS:
-            print(f"Analyzing data for: {symbol}")
-            df = fetch_data(symbol)
-            if df is not None:
-                df = analyze_data(df)
+        for symbol in symbols:
+            for timeframe in timeframes:
+                print(f"Checking {symbol} on {timeframe}...")
 
-                if df is not None and not df.empty:
-                    latest_row = df.iloc[-1]
-                    if latest_row['entry'] and symbol not in active_trades:
-                        entry_price = latest_row['close']
-                        tp1 = entry_price * (1 + TP1_PERCENT)
-                        tp2 = entry_price * (1 + TP2_PERCENT)
-                        sl = entry_price * (1 - SL_PERCENT)
+                df = fetch_candles(binance, symbol, timeframe)
+                if df.empty:
+                    continue
 
-                        active_trades[symbol] = {
-                            "entry_price": entry_price,
-                            "tp1": tp1,
-                            "tp2": tp2,
-                            "sl": sl,
-                            "hit_target": False,
-                            "hit_stop": False,
-                        }
-
-                        print(f"Entry signal found for {symbol} at {entry_price:.4f}")
-                        message = f"""
-📊 Trade Signal
-🔹 Symbol: {symbol}
-🔹 Timeframe: {TIMEFRAME}
-🔹 Entry: {entry_price:.4f}
-🎯 Target 1: {tp1:.4f} (+0.7%)
-🎯 Target 2: {tp2:.4f} (+1.5%)
-━━━━━━━━━━━━━━━━
-🔻 Stop Loss: {sl:.4f} (-1%)
-━━━━━━━━━━━━━━━━
-💭 Smart trading Bot 💭
-"""
-                        await send_signal(message)
-                        save_trades(active_trades)
-
-            if symbol in active_trades:
-                trade = active_trades[symbol]
-                current_price = df.iloc[-1]['close']
-
-                if not trade["hit_target"] and current_price >= trade["tp1"]:
-                    trade["hit_target"] = True
-                    print(f"Target 1 hit for {symbol} at {current_price:.4f}")
-                    message = f"""
-🎯 Target 1 Reached!
-🔹 Symbol: {symbol}
-🔹 Price: {current_price:.4f}
-🔹 Time: {pd.Timestamp.now()}
-"""
-                    await send_signal(message)
-                    save_trades(active_trades)
-
-                if not trade["hit_target"] and current_price >= trade["tp2"]:
-                    trade["hit_target"] = True
-                    print(f"Target 2 hit for {symbol} at {current_price:.4f}")
-                    message = f"""
-🎯 Target 2 Reached!
-🔹 Symbol: {symbol}
-🔹 Price: {current_price:.4f}
-🔹 Time: {pd.Timestamp.now()}
-"""
-                    await send_signal(message)
-                    save_trades(active_trades)
-
-                elif not trade["hit_stop"] and current_price <= trade["sl"]:
-                    trade["hit_stop"] = True
-                    print(f"Stop loss hit for {symbol} at {current_price:.4f}")
-                    message = f"""
-❌ Stop Loss Hit
-🔹 Symbol: {symbol}
-🔹 Price: {current_price:.4f}
-🔹 Time: {pd.Timestamp.now()}
-"""
-                    await send_signal(message)
-                    save_trades(active_trades)
-
-                if trade["hit_target"] or trade["hit_stop"]:
-                    del active_trades[symbol]
-                    save_trades(active_trades)
-
-        print("Waiting 15 minutes before analyzing new signals...")
-        await asyncio.sleep(900)
+                if detect_downtrend_breakout(df):
+                    entry_price = df['close'].iloc[-1]
+                    signal = prepare_signal(symbol, timeframe, entry_price)
+                    send_trade_signal(signal)
+                    monitor_targets(
+                        symbol, 
+                        entry_price, 
+                        signal['targets'], 
+                        signal['stop_loss'], 
+                        timeframe, 
+                        binance
+                    )
+        time.sleep(60)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
