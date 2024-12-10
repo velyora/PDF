@@ -1,7 +1,6 @@
 import requests
 import time
-import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import hmac
 import hashlib
 
@@ -28,6 +27,9 @@ SYMBOLS = [
     'FTMUSDT', 'ENJUSDT', 'EOSUSDT', 'FIROUSDT', 'FLMUSDT', 'FETUSDT'
 ]
 
+# السجل لمنع الشراء المكرر
+trade_log = {}
+
 # إنشاء توقيع للطلب
 def sign_request(data):
     query_string = "&".join([f"{key}={value}" for key, value in data.items()])
@@ -40,18 +42,17 @@ def send_telegram_message(message):
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
     requests.post(url, data=payload)
 
-# جلب معلومات الحد الأدنى والخطوة السعرية للرمز
-def get_symbol_info(symbol):
-    url = f"{BASE_URL}/api/v3/exchangeInfo"
-    response = requests.get(url)
+# التحقق من الرصيد
+def check_balance():
+    url = f"{BASE_URL}/api/v3/account"
+    headers = {"X-MBX-APIKEY": BINANCE_API_KEY}
+    response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        symbols_info = response.json()["symbols"]
-        for s in symbols_info:
-            if s["symbol"] == symbol:
-                for filter_ in s["filters"]:
-                    if filter_["filterType"] == "PRICE_FILTER":
-                        return float(filter_["tickSize"])
-    return None
+        balances = response.json().get("balances", [])
+        for balance in balances:
+            if balance["asset"] == "USDT":
+                return float(balance["free"])
+    return 0.0
 
 # تنفيذ أمر شراء
 def create_buy_order(symbol, usdt_amount):
@@ -74,12 +75,6 @@ def create_buy_order(symbol, usdt_amount):
 
 # وضع أمر بيع
 def create_sell_order(symbol, quantity, target_price):
-    tick_size = get_symbol_info(symbol)
-    if tick_size:
-        target_price = round(target_price // tick_size * tick_size, 8)  # ضبط السعر
-    else:
-        print(f"Failed to fetch tick size for {symbol}")
-        return None
     url = f"{BASE_URL}/api/v3/order"
     data = {
         "symbol": symbol,
@@ -101,35 +96,55 @@ def create_sell_order(symbol, quantity, target_price):
 
 # الوظيفة الرئيسية
 def main():
-    for symbol in SYMBOLS:
-        print(f"Checking opportunities for {symbol}...")
+    while True:
+        current_time = datetime.now()
 
-        # تنفيذ أمر شراء أولي بـ10 دولار
-        buy_order = create_buy_order(symbol, 10)
-        if buy_order and "fills" in buy_order:
-            executed_qty = float(buy_order["executedQty"])
-            entry_price = float(buy_order["fills"][0]["price"])
-            print(f"Buy order executed for {symbol} at {entry_price}")
+        # التحقق من الرصيد
+        balance = check_balance()
+        if balance < 10:
+            print("Insufficient balance. Waiting for funds...")
+            time.sleep(300)
+            continue
 
-            # حساب الهدف 2% أعلى
-            target_price = round(entry_price * 1.01, 6)
+        for symbol in SYMBOLS:
+            print(f"Checking opportunities for {symbol}...")
 
-            # وضع أمر بيع عند الهدف
-            sell_order = create_sell_order(symbol, executed_qty, target_price)
-            if sell_order:
-                print(f"Sell order placed for {symbol} at {target_price}")
-                send_telegram_message(f"""
+            # التحقق من السجل
+            if symbol in trade_log:
+                last_trade_time, last_trade_price = trade_log[symbol]
+                if current_time - last_trade_time < timedelta(hours=8):
+                    print(f"Skipping {symbol} due to recent trade.")
+                    continue
+
+            # تنفيذ أمر شراء بـ10 دولار
+            buy_order = create_buy_order(symbol, 10)
+            if buy_order and "fills" in buy_order:
+                executed_qty = float(buy_order["executedQty"])
+                entry_price = float(buy_order["fills"][0]["price"])
+                print(f"Buy order executed for {symbol} at {entry_price}")
+
+                # تسجيل العملية
+                trade_log[symbol] = (current_time, entry_price)
+
+                # حساب الهدف 2% أعلى
+                target_price = round(entry_price * 1.01, 6)
+
+                # وضع أمر بيع عند الهدف
+                sell_order = create_sell_order(symbol, executed_qty, target_price)
+                if sell_order:
+                    print(f"Sell order placed for {symbol} at {target_price}")
+                    send_telegram_message(f"""
 📊 <b>Order Summary</b>
 🔘 Symbol: {symbol}
 ✅ Bought at: {entry_price}
 🎯 Sell target: {target_price}
 """)
+                else:
+                    print(f"Failed to place sell order for {symbol}")
             else:
-                print(f"Failed to place sell order for {symbol}")
-        else:
-            print(f"Failed to execute initial buy order for {symbol}")
+                print(f"Failed to execute initial buy order for {symbol}")
 
-        time.sleep(60)  # الانتظار دقيقة قبل التحقق مرة أخرى
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
