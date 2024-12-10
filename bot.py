@@ -10,147 +10,126 @@ TELEGRAM_BOT_TOKEN = '7569416193:AAF8Nr7RWGGuhjhUkWrR-oFlDWaiYEVQBmM'
 TELEGRAM_CHAT_ID = '-1001664466794'
 
 # إعداد API Binance
-BINANCE_API_KEY = "yoFhD26cK6bYZRdCXpMKYgOYZbFcrnpwpbgPlclWyE1tduYm4idjy2CTmVm8XdZf"
-BINANCE_SECRET_KEY = "obKeJjUmJiRtzzCa0IkVAyEQ05m97xz0h5914WT4DsJeiyfIXvq3M7vTHoZ95DKq"
+BINANCE_API_KEY = 'yoFhD26cK6bYZRdCXpMKYgOYZbFcrnpwpbgPlclWyE1tduYm4idjy2CTmVm8XdZf'
+BINANCE_SECRET_KEY = 'obKeJjUmJiRtzzCa0IkVAyEQ05m97xz0h5914WT4DsJeiyfIXvq3M7vTHoZ95DKq'
 BASE_URL = "https://api.binance.com"
 
-# قائمة العملات (70 عملة)
+# قائمة العملات
 SYMBOLS = [
-    'ADAUSDT', 'XRPUSDT', 'DOGEUSDT', 'SOLUSDT', 'DOTUSDT', 'MATICUSDT',
-    'CELRUSDT', 'TRXUSDT', 'AVAXUSDT', 'ATOMUSDT', 'LINKUSDT', 'LTCUSDT',
-    'ALGOUSDT', 'NEARUSDT', 'QNTUSDT', 'VETUSDT', 'FILUSDT', 'FLOWUSDT',
-    'ICPUSDT', 'EGLDUSDT', 'XTZUSDT', 'MANAUSDT', 'SANDUSDT', 'FTMUSDT',
-    'AXSUSDT', 'GALAUSDT', 'ONEUSDT', 'XECUSDT', 'CHZUSDT', 'ZILUSDT',
-    'ROSEUSDT', 'BATUSDT'
+    'BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'ADAUSDT', 'SOLUSDT', 'SXPUSDT', 'SYSUSDT',
+    'TOMOUSDT', 'TRXUSDT', 'TWTUSDT', 'VETUSDT', 'VGXUSDT', 'VITEUSDT', 'VTHOUSDT',
+    'WAVESUSDT', 'XLMUSDT', 'XTZUSDT', 'ZECUSDT', 'ZILUSDT', 'ZRXUSDT', 'NEBLUSDT',
+    'NEOUSDT', 'OGNUSDT', 'OMGUSDT', 'ONGUSDT', 'ONTUSDT', 'OXTUSDT', 'RSRUSDT',
+    'SCUSDT', 'SCRTUSDT', 'SFPUSDT', 'SKLUSDT', 'SNTUSDT', 'STEEMUSDT', 'GRTUSDT',
+    'STRAXUSDT', 'ICXUSDT', 'IOSTUSDT', 'IOTAUSDT', 'KSMUSDT', 'LINKUSDT', 'LITUSDT',
+    'LSKUSDT', 'LTCUSDT', 'LTOUSDT', 'MANAUSDT', 'MDTUSDT', 'COCOSUSDT', 'NANOUSDT',
+    'COSUSDT', 'COTIUSDT', 'CTSIUSDT', 'CVCUSDT', 'DASHUSDT', 'DCRUSDT', 'DENTUSDT',
+    'DGBUSDT', 'DOCKUSDT', 'DOGEUSDT', 'ICPUSDT', 'DOTUSDT', 'EGLDUSDT', 'ELFUSDT',
+    'FTMUSDT', 'ENJUSDT', 'EOSUSDT', 'FIROUSDT', 'FLMUSDT', 'FETUSDT'
 ]
 
-# تتبع الإشارات المفتوحة
-open_positions = {}
+# إنشاء توقيع للطلب
+def sign_request(data):
+    query_string = "&".join([f"{key}={value}" for key, value in data.items()])
+    signature = hmac.new(BINANCE_SECRET_KEY.encode(), query_string.encode(), hashlib.sha256).hexdigest()
+    return signature
 
-# إرسال الرسائل إلى التيلجرام
+# إرسال رسائل التيلجرام
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-    except Exception as e:
-        print(f"Error sending Telegram message: {e}")
+    requests.post(url, data=payload)
 
-# جلب بيانات الشموع
-def fetch_candles(symbol, timeframe="15m", limit=5):
-    url = f"{BASE_URL}/api/v3/klines"
-    params = {"symbol": symbol, "interval": timeframe, "limit": limit}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        return [{"timestamp": candle[0], "high": float(candle[2]), "close": float(candle[4]), "open": float(candle[1])} for candle in response.json()]
-    except Exception as e:
-        print(f"Error fetching candles for {symbol}: {e}")
-        return []
+# جلب معلومات الحد الأدنى والخطوة السعرية للرمز
+def get_symbol_info(symbol):
+    url = f"{BASE_URL}/api/v3/exchangeInfo"
+    response = requests.get(url)
+    if response.status_code == 200:
+        symbols_info = response.json()["symbols"]
+        for s in symbols_info:
+            if s["symbol"] == symbol:
+                for filter_ in s["filters"]:
+                    if filter_["filterType"] == "PRICE_FILTER":
+                        return float(filter_["tickSize"])
+    return None
 
-# التحقق من الزخم وكسر القمة
-def is_strong_momentum(candles):
-    green_count = 0
-    for candle in candles[-4:-1]:  # آخر 3 شموع
-        if candle["close"] > candle["open"]:
-            green_count += 1
-    return green_count >= 3
-
-# تنفيذ أمر الشراء
-def place_market_buy_order(symbol, usd_amount):
-    price = get_current_price(symbol)
-    if price is None:
-        return None
-    quantity = round(usd_amount / price, 6)
+# تنفيذ أمر شراء
+def create_buy_order(symbol, usdt_amount):
     url = f"{BASE_URL}/api/v3/order"
-    params = {
+    data = {
         "symbol": symbol,
         "side": "BUY",
         "type": "MARKET",
-        "quantity": quantity,
+        "quoteOrderQty": usdt_amount,
         "timestamp": int(time.time() * 1000)
     }
+    data["signature"] = sign_request(data)
     headers = {"X-MBX-APIKEY": BINANCE_API_KEY}
-    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-    signature = hmac.new(BINANCE_SECRET_KEY.encode(), query_string.encode(), hashlib.sha256).hexdigest()
-    params["signature"] = signature
-    try:
-        response = requests.post(url, params=params, headers=headers)
-        response.raise_for_status()
-        send_telegram_message(f"✅ Market buy order placed for {symbol} with {usd_amount} USD at price {price}")
+    response = requests.post(url, params=data, headers=headers)
+    if response.status_code == 200:
         return response.json()
-    except Exception as e:
-        print(f"Error placing buy order for {symbol}: {e}")
+    else:
+        print("Error creating buy order:", response.json())
         return None
 
-# تنفيذ أمر البيع بحد
-def place_limit_sell_order(symbol, quantity, target_price):
+# وضع أمر بيع
+def create_sell_order(symbol, quantity, target_price):
+    tick_size = get_symbol_info(symbol)
+    if tick_size:
+        target_price = round(target_price // tick_size * tick_size, 8)  # ضبط السعر
+    else:
+        print(f"Failed to fetch tick size for {symbol}")
+        return None
     url = f"{BASE_URL}/api/v3/order"
-    params = {
+    data = {
         "symbol": symbol,
         "side": "SELL",
         "type": "LIMIT",
         "timeInForce": "GTC",
-        "quantity": quantity,
-        "price": f"{target_price:.6f}",
+        "quantity": f"{quantity:.8f}",
+        "price": f"{target_price:.8f}",
         "timestamp": int(time.time() * 1000)
     }
+    data["signature"] = sign_request(data)
     headers = {"X-MBX-APIKEY": BINANCE_API_KEY}
-    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-    signature = hmac.new(BINANCE_SECRET_KEY.encode(), query_string.encode(), hashlib.sha256).hexdigest()
-    params["signature"] = signature
-    try:
-        response = requests.post(url, params=params, headers=headers)
-        response.raise_for_status()
-        send_telegram_message(f"✅ Limit sell order placed for {symbol} at price {target_price}")
+    response = requests.post(url, params=data, headers=headers)
+    if response.status_code == 200:
         return response.json()
-    except Exception as e:
-        print(f"Error placing sell order for {symbol}: {e}")
-        return None
-
-# جلب السعر الحالي
-def get_current_price(symbol):
-    url = f"{BASE_URL}/api/v3/ticker/price"
-    params = {"symbol": symbol}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        return float(response.json()["price"])
-    except Exception as e:
-        print(f"Error fetching current price for {symbol}: {e}")
+    else:
+        print("Error creating sell order:", response.json())
         return None
 
 # الوظيفة الرئيسية
 def main():
-    usd_amount = 100
-    max_positions = 7
-    while True:
-        total_open_positions = len(open_positions)
-        if total_open_positions >= max_positions:
-            time.sleep(10)
-            continue
+    for symbol in SYMBOLS:
+        print(f"Checking opportunities for {symbol}...")
 
-        for symbol in SYMBOLS:
-            if symbol in open_positions:
-                continue
+        # تنفيذ أمر شراء أولي بـ10 دولار
+        buy_order = create_buy_order(symbol, 10)
+        if buy_order and "fills" in buy_order:
+            executed_qty = float(buy_order["executedQty"])
+            entry_price = float(buy_order["fills"][0]["price"])
+            print(f"Buy order executed for {symbol} at {entry_price}")
 
-            candles = fetch_candles(symbol)
-            if len(candles) < 5:
-                continue
+            # حساب الهدف 2% أعلى
+            target_price = round(entry_price * 1.01, 6)
 
-            previous_high = candles[-2]["high"]
-            last_close = candles[-1]["close"]
+            # وضع أمر بيع عند الهدف
+            sell_order = create_sell_order(symbol, executed_qty, target_price)
+            if sell_order:
+                print(f"Sell order placed for {symbol} at {target_price}")
+                send_telegram_message(f"""
+📊 <b>Order Summary</b>
+🔘 Symbol: {symbol}
+✅ Bought at: {entry_price}
+🎯 Sell target: {target_price}
+""")
+            else:
+                print(f"Failed to place sell order for {symbol}")
+        else:
+            print(f"Failed to execute initial buy order for {symbol}")
 
-            if last_close > previous_high and is_strong_momentum(candles):
-                buy_order = place_market_buy_order(symbol, usd_amount)
-                if buy_order:
-                    buy_price = float(buy_order['fills'][0]['price'])
-                    quantity = float(buy_order['executedQty'])
-                    target_price = round(buy_price * 1.007, 6)
-                    place_limit_sell_order(symbol, quantity, target_price)
-                    open_positions[symbol] = {"quantity": quantity, "target_price": target_price}
-        time.sleep(5)
+        time.sleep(60)  # الانتظار دقيقة قبل التحقق مرة أخرى
 
 if __name__ == "__main__":
     main()
