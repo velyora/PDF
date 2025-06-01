@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF to Word Converter - Free & Instant</title>
+  <style>
+    :root {
+      --primary-color: #ff0099;
+      --secondary-color: #ff71ce;
+      --accent-color: #b967ff;
+      --dark-bg: #0f0f1e;
+      --darker-bg: #0a0a14;
+      --card-bg: #1a1a2e;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3cc;
+      --success-color: #01ffc3;
+      --warning-color: #ffb800;
+      --glow-effect: 0 0 10px rgba(255, 0, 153, 0.5), 0 0 20px rgba(255, 0, 153, 0.3), 0 0 30px rgba(255, 0, 153, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 0, 153, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(185, 103, 255, 0.05) 0%, transparent 20%),
+        linear-gradient(135deg, rgba(15, 15, 30, 0.9) 0%, rgba(10, 10, 20, 0.9) 100%);
+      background-attachment: fixed;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Neon text effect */
+    .neon-text {
+      text-shadow: 0 0 5px rgba(255, 0, 153, 0.8), 0 0 10px rgba(255, 0, 153, 0.5), 0 0 15px rgba(255, 0, 153, 0.3);
+      color: var(--text-primary);
+    }
+    
+    /* Glassmorphism effect */
+    .glass-effect {
+      background: rgba(26, 26, 46, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    header {
+      background: rgba(10, 10, 20, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 0, 153, 0.1);
+      padding: 15px 0;
+      position: fixed;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .logo-icon {
+      margin-right: 10px;
+      font-size: 28px;
+      color: var(--primary-color);
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary-color);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .hero {
+      padding: 180px 0 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255, 0, 153, 0.1) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 800;
+    }
+    
+    h1::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+    
+    .subheading {
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 800px;
+    }
+    
+    .converter-container {
+      background: rgba(26, 26, 46, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 0, 153, 0.2);
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto 60px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      animation: pulseGlow 4s infinite alternate;
+    }
+    
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 0, 153, 0.2);
+      }
+      100% {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 0, 153, 0.4);
+      }
+    }
+    
+    .converter-container::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, rgba(255, 0, 153, 0.1), transparent 30%);
+      animation: rotate 10s linear infinite;
+      z-index: -1;
+    }
+    
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .upload-area {
+      border: 2px dashed rgba(255, 0, 153, 0.3);
+      border-radius: 10px;
+      padding: 40px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      background-color: rgba(26, 26, 46, 0.5);
+      margin-bottom: 30px;
+      cursor: pointer;
+    }
+    
+    .upload-area:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(255, 0, 153, 0.05);
+      transform: translateY(-5px);
+    }
+    
+    .upload-icon {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 5px rgba(255, 0, 153, 0.5));
+    }
+    
+    .upload-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+    
+    .upload-input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .cta-button {
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      color: white;
+      padding: 16px 40px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 0, 153, 0.4);
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(255, 0, 153, 0.6);
+    }
+    
+    .cta-button:active {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(255, 0, 153, 0.4);
+    }
+    
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.6s ease;
+    }
+    
+    .cta-button:hover::before {
+      left: 100%;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin: 100px 0;
+    }
+    
+    .feature-card {
+      background: rgba(26, 26, 46, 0.7);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      border: 1px solid rgba(255, 0, 153, 0.1);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 0, 153, 0.3);
+    }
+    
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+      z-index: -1;
+      transition: width 0.3s ease;
+    }
+    
+    .feature-card:hover::before {
+      width: 100%;
+      opacity: 0.1;
+    }
+    
+    .feature-icon {
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+      color: white;
+      font-size: 28px;
+      box-shadow: 0 5px 15px rgba(255, 0, 153, 0.3);
+    }
+    
+    .feature-title {
+      font-size: 22px;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .feature-text {
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    
+    .testimonials {
+      background: rgba(15, 15, 30, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 100px 0;
+      margin: 100px 0;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(255, 0, 153, 0.1);
+      border-bottom: 1px solid rgba(255, 0, 153, 0.1);
+    }
+    
+    .testimonials::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 0, 153, 0.1) 0%, transparent 70%);
+      top: -150px;
+      right: -150px;
+      border-radius: 50%;
+    }
+    
+    .testimonials::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(185, 103, 255, 0.1) 0%, transparent 70%);
+      bottom: -150px;
+      left: -150px;
+      border-radius: 50%;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+      font-size: 2.5rem;
+      color: var(--text-primary);
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .section-title span {
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+    
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    
+    .testimonial-card {
+      background: rgba(26, 26, 46, 0.5);
+      border-radius: 12px;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 0, 153, 0.2);
+    }
+    
+    .testimonial-text {
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      position: relative;
+      line-height: 1.8;
+    }
+    
+    .testimonial-text::before {
+      content: """;
+      font-size: 60px;
+      color: rgba(255, 0, 153, 0.2);
+      position: absolute;
+      top: -20px;
+      left: -10px;
+      font-family: serif;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+    }
+    
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      box-shadow: 0 3px 10px rgba(255, 0, 153, 0.3);
+    }
+    
+    .author-details {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .author-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .author-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .faq {
+      margin: 100px 0;
+    }
+    
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .faq-item {
+      margin-bottom: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      background: rgba(26, 26, 46, 0.5);
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .faq-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 0, 153, 0.2);
+    }
+    
+    .faq-question {
+      padding: 20px;
+      background: rgba(26, 26, 46, 0.8);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--text-primary);
+    }
+    
+    .faq-question:hover {
+      background: rgba(255, 0, 153, 0.1);
+    }
+    
+    .faq-answer {
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, padding 0.5s ease;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    
+    .faq-answer.active {
+      padding: 20px;
+      max-height: 1000px;
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(26, 26, 46, 0.9)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ff0099' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      padding: 100px 0;
+      text-align: center;
+      border-radius: 15px;
+      margin: 80px 0;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 0, 153, 0.3);
+    }
+    
+    .cta-title {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(255, 0, 153, 0.5);
+    }
+    
+    .cta-text {
+      font-size: 1.3rem;
+      margin-bottom: 40px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      color: var(--text-secondary);
+    }
+    
+    .cta-button-light {
+      background-color: transparent;
+      color: white;
+      padding: 16px 40px;
+      font-size: 18px;
+      font-weight: 600;
+      border: 2px solid var(--primary-color);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(255, 0, 153, 0.3);
+      text-decoration: none;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .cta-button-light::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: all 0.5s ease;
+      z-index: -1;
+    }
+    
+    .cta-button-light:hover::before {
+      width: 100%;
+    }
+    
+    .cta-button-light:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 7px 20px rgba(255, 0, 153, 0.5);
+      color: white;
+      border-color: transparent;
+    }
+    
+    footer {
+      background-color: var(--darker-bg);
+      color: white;
+      padding: 80px 0 30px;
+      border-top: 1px solid rgba(255, 0, 153, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    footer::before {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 0, 153, 0.1) 0%, transparent 70%);
+      top: 0;
+      right: 0;
+      border-radius: 50%;
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+    
+    .footer-column h3 {
+      font-size: 18px;
+      margin-bottom: 25px;
+      position: relative;
+      padding-bottom: 10px;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .footer-column h3::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+    
+    .footer-column ul {
+      list-style: none;
+    }
+    
+    .footer-column ul li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-column ul li a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      padding-left: 15px;
+    }
+    
+    .footer-column ul li a::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+    }
+    
+    .footer-column ul li a:hover {
+      color: var(--primary-color);
+      padding-left: 20px;
+    }
+    
+    .footer-column ul li a:hover::before {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: var(--text-primary);
+      font-size: 18px;
+    }
+    
+    .social-icon:hover {
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      transform: translateY(-5px) rotate(10deg);
+      box-shadow: 0 5px 15px rgba(255, 0, 153, 0.3);
+    }
+    
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .footer-logo {
+      margin-bottom: 20px;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .footer-logo span {
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Counter Animation */
+    .counter-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 80px 0;
+      flex-wrap: wrap;
+    }
+    
+    .counter-item {
+      text-align: center;
+      padding: 30px;
+      background: rgba(26, 26, 46, 0.5);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .counter-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 0, 153, 0.3);
+    }
+    
+    .counter-item::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      bottom: 0;
+      left: 0;
+    }
+    
+    .counter-number {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    
+    .counter-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Trust Badges */
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+    
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      color: var(--text-secondary);
+      font-weight: 500;
+      background: rgba(26, 26, 46, 0.5);
+      padding: 10px 20px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    
+    .trust-badge:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 0, 153, 0.2);
+      background: rgba(255, 0, 153, 0.1);
+    }
+    
+    .trust-badge-icon {
+      margin-right: 10px;
+      color: var(--success-color);
+      font-size: 20px;
+    }
+    
+    /* File type icons */
+    .file-types {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .file-type {
+      padding: 8px 20px;
+      background-color: rgba(255, 0, 153, 0.1);
+      border-radius: 20px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 0, 153, 0.2);
+    }
+    
+    .file-type:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 0 10px rgba(255, 0, 153, 0.2);
+      background-color: rgba(255, 0, 153, 0.2);
+    }
+    
+    .file-icon {
+      margin-right: 8px;
+      color: var(--primary-color);
+    }
+    
+    /* Animation for numbers */
+    @keyframes count-up {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .counter-number.animate {
+      animation: count-up 1s ease forwards;
+    }
+    
+    /* Pulse effect for conversion button */
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 153, 0.5);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(255, 0, 153, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 153, 0);
+      }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Steps section */
+    .steps-container {
+      margin: 100px 0;
+    }
+    
+    .steps {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+      position: relative;
+    }
+    
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      opacity: 0.3;
+      z-index: -1;
+    }
+    
+    .step {
+      text-align: center;
+      flex: 1;
+      position: relative;
+      padding: 0 20px;
+    }
+    
+    .step-number {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      font-size: 30px;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 5px 15px rgba(255, 0, 153, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+    
+    .step-text {
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    /* Statistics bar */
+    .stats-bar {
+      background: rgba(26, 26, 46, 0.5);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 40px 0;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 10px 20px;
+    }
+    
+    .stat-number {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Animated background effect */
+    .animated-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      opacity: 0.3;
+      animation: float 15s infinite;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0.3;
+      }
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1024px) {
+      .hero {
+        padding: 150px 0 80px;
+      }
+      
+      .steps {
+        flex-direction: column;
+        gap: 50px;
+      }
+      
+      .steps::before {
+        width: 2px;
+        height: 100%;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      
+      .step-number {
+        margin: 0 auto 20px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.8rem;
+      }
+      
+      .subheading {
+        font-size: 1.2rem;
+      }
+      
+      .converter-container {
+        padding: 30px 20px;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .features {
+        gap: 20px;
+      }
+      
+      .counter-item {
+        flex-basis: 100%;
+        margin-bottom: 20px;
+      }
+      
+      .cta-title {
+        font-size: 2.2rem;
+      }
+      
+      .steps::before {
+        display: none;
+      }
+      
+      .step {
+        padding: 20px;
+        margin-bottom: 20px;
+        background: rgba(26, 26, 46, 0.5);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 0, 153, 0.1);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .cta-button, .cta-button-light {
+        padding: 14px 28px;
+        font-size: 16px;
+      }
+      
+      .upload-area {
+        padding: 30px 15px;
+      }
+      
+      .upload-icon {
+        font-size: 40px;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .trust-badges {
+        gap: 15px;
+      }
+      
+      .trust-badge {
+        padding: 8px 15px;
+        font-size: 14px;
+      }
+      
+      .step-number {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      }
+    }
+    
+    /* Mobile menu */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: block;
+      }
+      
+      .nav-links {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 80%;
+        height: calc(100vh - 70px);
+        background: rgba(10, 10, 20, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: 40px;
+        transition: right 0.3s ease;
+        z-index: 1000;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .nav-links.active {
+        right: 0;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+      }
+      
+      .nav-link {
+        font-size: 18px;
+        padding: 15px 0;
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    /* Animated arrow */
+    .scroll-down {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+    }
+    
+    .scroll-text {
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .arrow {
+      width: 30px;
+      height: 30px;
+      border-right: 2px solid var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      transform: rotate(45deg);
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) rotate(45deg);
+      }
+      40% {
+        transform: translateY(-15px) rotate(45deg);
+      }
+      60% {
+        transform: translateY(-7px) rotate(45deg);
+      }
+    }
+    
+    /* File format compatibility */
+    .format-compatibility {
+      background: rgba(26, 26, 46, 0.5);
+      border-radius: 10px;
+      padding: 30px;
+      margin: 60px 0;
+      border: 1px solid rgba(255, 0, 153, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .format-title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+    }
+    
+    .format-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 20px;
+    }
+    
+    .format-item {
+      background: rgba(15, 15, 30, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 0, 153, 0.1);
+    }
+    
+    .format-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 0, 153, 0.2);
+      background: rgba(255, 0, 153, 0.1);
+    }
+    
+    .format-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .format-name {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    /* Cursor effect */
+    .custom-cursor {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: rgba(255, 0, 153, 0.5);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s, background-color 0.3s;
+      mix-blend-mode: difference;
+    }
+    
+    .cursor-dot {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+    }
+    
+    .expand {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(255, 0, 153, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+  <div class="cursor-dot"></div>
+
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="#" class="logo">
+          <span class="logo-icon">🔄</span>
+          PDF<span style="color: var(--primary-color);">Convert</span>
+        </a>
+        <nav class="nav-links" id="navLinks">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#how-it-works" class="nav-link">How It Works</a>
+          <a href="#testimonials" class="nav-link">Testimonials</a>
+          <a href="#faq" class="nav-link">FAQ</a>
+        </nav>
+        <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="animated-bg" id="animatedBg"></div>
+    <div class="container">
+      <h1 class="neon-text">Transform PDF to Word in Seconds</h1>
+      <p class="subheading">Advanced AI-powered technology converts your PDF files to fully editable Word documents with perfect accuracy - 100% free, no registration required.</p>
+      
+      <div class="converter-container">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📤</div>
+          <p class="upload-text">Drag & Drop your PDF here or Click to Browse</p>
+          <input type="file" class="upload-input" accept=".pdf" id="fileInput">
+        </div>
+        
+        <div class="file-types">
+          <div class="file-type"><span class="file-icon">📄</span> PDF</div>
+          <div class="file-type"><span class="file-icon">📝</span> DOCX</div>
+          <div class="file-type"><span class="file-icon">📋</span> TXT</div>
+        </div>
+        
+        <a href="https://your-adsterra-direct-link.com" class="cta-button pulse" target="_blank">Convert Now</a>
+        
+        <div class="trust-badges">
+          <div class="trust-badge">
+            <span class="trust-badge-icon">✓</span>
+            100% Secure
+          </div>
+          <div class="trust-badge">
+            <span class="trust-badge-icon">✓</span>
+            No Registration
+          </div>
+          <div class="trust-badge">
+            <span class="trust-badge-icon">✓</span>
+            Lightning Fast
+          </div>
+        </div>
+      </div>
+      
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-number">5M+</div>
+          <div class="stat-text">Files Converted</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">99.8%</div>
+          <div class="stat-text">Accuracy</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">4.9/5</div>
+          <div class="stat-text">User Rating</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-text">Support</div>
+        </div>
+      </div>
+      
+      <a href="#how-it-works" class="scroll-down">
+        <span class="scroll-text">Learn More</span>
+        <div class="arrow"></div>
+      </a>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="steps-container">
+    <div class="container">
+      <h2 class="section-title">How It <span>Works</span></h2>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Upload Your PDF</h3>
+          <p class="step-text">Simply drag & drop your PDF file or browse to select it from your device.</p>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 class="step-title">AI Processing</h3>
+          <p class="step-text">Our advanced AI engine analyzes and converts your document with perfect formatting.</p>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Download Word File</h3>
+          <p class="step-text">Get your fully editable Word document instantly - ready to use!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <div class="container">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Ultra Fast Conversion</h3>
+        <p class="feature-text">Transform your PDF files to Word in seconds, regardless of file size or complexity.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Advanced Security</h3>
+        <p class="feature-text">Your files are encrypted during processing and automatically deleted after conversion.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">💯</div>
+        <h3 class="feature-title">Perfect Accuracy</h3>
+        <p class="feature-text">Our AI maintains original formatting including fonts, images, tables, and layouts.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3 class="feature-title">Unlimited Conversions</h3>
+        <p class="feature-text">Use our tool as much as you need with no restrictions on number of files or size.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3 class="feature-title">Cross-Platform</h3>
+        <p class="feature-text">Works flawlessly on all devices and browsers - desktop, mobile, and tablet.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3 class="feature-title">No Installation</h3>
+        <p class="feature-text">Web-based solution requires no downloads or plugins - works instantly from your browser.</p>
+      </div>
+    </div>
+  </section>
+  
+  <section class="format-compatibility container">
+    <h3 class="format-title">Compatible with All File Formats</h3>
+    <div class="format-grid">
+      <div class="format-item">
+        <div class="format-icon">📄</div>
+        <div class="format-name">PDF</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">📝</div>
+        <div class="format-name">DOCX</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">📋</div>
+        <div class="format-name">TXT</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">📊</div>
+        <div class="format-name">XLS</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">📈</div>
+        <div class="format-name">PPT</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">🖼️</div>
+        <div class="format-name">JPG</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">📷</div>
+        <div class="format-name">PNG</div>
+      </div>
+      <div class="format-item">
+        <div class="format-icon">🔍</div>
+        <div class="format-name">TIFF</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="counter-container">
+    <div class="counter-item">
+      <div class="counter-number" data-target="5000000">5M+</div>
+      <div class="counter-text">Files Converted</div>
+    </div>
+    <div class="counter-item">
+      <div class="counter-number" data-target="250000">250K+</div>
+      <div class="counter-text">Happy Users</div>
+    </div>
+    <div class="counter-item">
+      <div class="counter-number" data-target="99">99%</div>
+      <div class="counter-text">Conversion Accuracy</div>
+    </div>
+  </div>
+
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <h2 class="section-title">What Our <span>Users Say</span></h2>
+      
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <p class="testimonial-text">This tool saved me hours of work! I needed to edit a PDF contract urgently and was able to convert it to Word in seconds. The formatting was perfect!</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">S</div>
+            <div class="author-details">
+              <div class="author-name">Sarah Johnson</div>
+              <div class="author-title">Marketing Director</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p class="testimonial-text">As a student, I deal with lots of PDF files. This converter helps me edit my research papers easily. The best part - it's completely free and doesn't require registration!</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">M</div>
+            <div class="author-details">
+              <div class="author-name">Michael Chen</div>
+              <div class="author-title">PhD Student</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p class="testimonial-text">The best conversion tool I've ever used! Fast, accurate, and easy to use. I'm impressed with how well it preserves complex layouts and tables.</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">J</div>
+            <div class="author-details">
+              <div class="author-name">Jessica Williams</div>
+              <div class="author-title">Graphic Designer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="container">
+    <div class="faq">
+      <h2 class="section-title">Frequently <span>Asked Questions</span></h2>
+      
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            Is this service really free?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, our PDF to Word conversion service is 100% free. There are no hidden fees, subscriptions, or future payments required.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            Are my files stored on your servers?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            No, we respect your privacy completely. All files are automatically deleted after conversion, and we don't keep any copies on our servers.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            What is the maximum file size?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            You can convert files up to 100MB in size. This is sufficient for most documents, reports, and presentations.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            Do I need to create an account?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            No registration or account creation is required. Simply upload your file and get your converted document instantly.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            Can I convert multiple files at once?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, our premium batch conversion feature allows you to convert up to 20 files simultaneously. The free version supports one file at a time.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            How accurate is the conversion?
+            <span>+</span>
+          </div>
+          <div class="faq-answer">
+            Our advanced AI engine delivers 99.8% accuracy, preserving all formatting elements including fonts, images, tables, columns, and styling.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="cta-title">Start Converting Now & Boost Your Productivity</h2>
+      <p class="cta-text">No more struggling with PDF files. Convert them to Word and enjoy complete editing freedom.</p>
+      <a href="https://your-adsterra-direct-link.com" class="cta-button-light" target="_blank">Convert PDF to Word Now</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <div class="footer-logo"><span>PDF</span>Convert</div>
+          <p>Professional tool for converting PDF files to Word with ease and precision. Available for free to everyone.</p>
+          <div class="social-links">
+            <a href="#" class="social-icon">f</a>
+            <a href="#" class="social-icon">t</a>
+            <a href="#" class="social-icon">in</a>
+            <a href="#" class="social-icon">ig</a>
+          </div>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Other Tools</h3>
+          <ul>
+            <li><a href="#">Word to PDF</a></li>
+            <li><a href="#">Compress PDF</a></li>
+            <li><a href="#">Merge PDF</a></li>
+            <li><a href="#">Split PDF</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2025 PDF to Word Converter. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Upload area interaction
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    
+    uploadArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--primary-color)';
+      uploadArea.style.backgroundColor = 'rgba(255, 0, 153, 0.05)';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = 'rgba(255, 0, 153, 0.3)';
+      uploadArea.style.backgroundColor = 'rgba(26, 26, 46, 0.5)';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'rgba(255, 0, 153, 0.3)';
+      uploadArea.style.backgroundColor = 'rgba(26, 26, 46, 0.5)';
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        const fileName = e.dataTransfer.files[0].name;
+        if (fileName.endsWith('.pdf')) {
+          uploadArea.querySelector('.upload-text').textContent = `Selected file: ${fileName}`;
+        } else {
+          alert('Please select a PDF file only');
+        }
+      }
+    });
+    
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        const fileName = fileInput.files[0].name;
+        if (fileName.endsWith('.pdf')) {
+          uploadArea.querySelector('.upload-text').textContent = `Selected file: ${fileName}`;
+        } else {
+          alert('Please select a PDF file only');
+          fileInput.value = '';
+        }
+      }
+    });
+    
+    // FAQ toggle
+    function toggleFaq(element) {
+      const answer = element.nextElementSibling;
+      const isActive = answer.classList.contains('active');
+      
+      // Close all FAQs
+      document.querySelectorAll('.faq-answer').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.faq-question span').forEach(span => {
+        span.textContent = '+';
+      });
+      
+      // Open current FAQ if it was closed
+      if (!isActive) {
+        answer.classList.add('active');
+        element.querySelector('span').textContent = '−';
+      }
+    }
+    
+    // Counter animation
+    function animateCounters() {
+      const counters = document.querySelectorAll('.counter-number');
+      
+      counters.forEach(counter => {
+        const target = counter.textContent;
+        const suffix = target.match(/[^0-9]/g) ? target.match(/[^0-9]/g).join('') : '';
+        const targetNumber = parseInt(target.replace(/[^0-9]/g, ''));
+        let count = 0;
+        const duration = 2000; // 2 seconds
+        const increment = targetNumber / (duration / 20);
+        
+        const timer = setInterval(() => {
+          count += increment;
+          if (count >= targetNumber) {
+            counter.textContent = targetNumber + suffix;
+            clearInterval(timer);
+          } else {
+            counter.textContent = Math.floor(count) + suffix;
+          }
+        }, 20);
+      });
+    }
+    
+    // Run counter animation when scrolled into view
+    const counterSection = document.querySelector('.counter-container');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounters();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    observer.observe(counterSection);
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+    
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      menuToggle.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+    });
+    
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        menuToggle.textContent = '☰';
+      });
+    });
+    
+    // Animated background
+    function createParticles() {
+      const animatedBg = document.getElementById('animatedBg');
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size
+        const size = Math.random() * 100 + 50;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100 + 100;
+        particle.style.left = `${posX}%`;
+        particle.style.top = `${posY}%`;
+        
+        // Random animation duration and delay
+        const duration = Math.random() * 15 + 15;
+        const delay = Math.random() * 5;
+        particle.style.animationDuration = `${duration}s`;
+        particle.style.animationDelay = `${delay}s`;
+        
+        animatedBg.appendChild(particle);
+      }
+    }
+    
+    createParticles();
+    
+    // Custom cursor effect
+    const cursor = document.querySelector('.custom-cursor');
+    const cursorDot = document.querySelector('.cursor-dot');
+    
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      
+      cursorDot.style.left = e.clientX + 'px';
+      cursorDot.style.top = e.clientY + 'px';
+    });
+    
+    document.addEventListener('mousedown', () => {
+      cursor.classList.add('expand');
+    });
+    
+    document.addEventListener('mouseup', () => {
+      cursor.classList.remove('expand');
+    });
+    
+    // Add hover effect to interactive elements
+    const interactiveElements = document.querySelectorAll('a, button, .upload-area, .faq-question, .feature-card, .testimonial-card');
+    
+    interactiveElements.forEach(element => {
+      element.addEventListener('mouseenter', () => {
+        cursor.classList.add('expand');
+      });
+      
+      element.addEventListener('mouseleave', () => {
+        cursor.classList.remove('expand');
+      });
+    });
+    
+    // Hide default cursor on desktop
+    if (window.innerWidth > 768) {
+      document.body.style.cursor = 'none';
+    }
+  </script>
+</body>
+</html>
