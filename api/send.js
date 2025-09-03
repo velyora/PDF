@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   const { message } = req.body;
-  const TELEGRAM_BOT_TOKEN = "7569416193:AAF8Nr7RWGGuhjhUkWrR-oFlDWaiYEVQBmM";
+  const TELEGRAM_BOT_TOKEN = "6961886563:AAHZwl-UaAWaGgXwzyp1vazRu1Hf37FKX2A";
   const CHAT_ID = "-1002290156309";
 
   try {
